@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+    <style>
+        span:hover {
+            color: purple;
+            text-decoration: underline;
+        }
+    </style>
+
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                url: 'http://localhost:8080/city',
+                method: 'GET',
+                success: function (result) {
+                    let cityTable = `
+                    <tr>
+                        <th>#</th>
+                        <th>City name</th>
+                        <th>Country</th>
+                        <th>Area</th>
+                        <th>Population</th>
+                        <th>GDP</th>
+                        <th>Description</th>
+                    </tr>
+                    `
+
+                    for (const city of result) {
+                        cityTable += `
+                        <tr>
+                            <td>${city.cityId}</td>
+                            <td><span onclick="showDetails(${city.cityId})">${city.name}</span></td>
+                            <td>${city.country}</td>
+                            <td>${city.area}</td>
+                            <td>${city.population}</td>
+                            <td>${city.gdp}</td>
+                            <td>${city.description}</td>
+                            <td><button onclick="showEditForm(${city.cityId})">Edit</button></td>
+                            <td><button onclick="deleteCity(${city.cityId})">Delete</button></td>
+                        </tr>`
+
+                        document.getElementById('city-table').innerHTML = cityTable
+                    }
+                }
+            })
+        })
+    </script>
+
+    <script>
+        function displayAddForm() {
+            let addForm = `
+            <form>
+                <div>
+                    <label for="">City name</label>
+                    <input type="text" id="cityName">
+                </div>
+                <div>
+                    <label for="">Country</label>
+                    <input type="text" id="country">
+                </div>
+                <div>
+                    <label for="">Area</label>
+                    <input type="number" id="area">
+                </div>
+                <div>
+                    <label for="">Population</label>
+                    <input type="number" id="population">
+                </div>
+                <div>
+                    <label for="">GDP</label>
+                    <input type="number" id="gdp">
+                </div>
+                <div>
+                    <label for="">Description</label>
+                    <input type="text" id="description">
+                </div>
+                <button type="button" onclick="saveCity()">Submit</button>
+            </form>
+            `
+
+            document.getElementById('add-form').innerHTML = addForm
+
+        }
+    </script>
+
+    <script>
+        function saveCity() {
+            let cityName = $('#cityName').val()
+            let country = $('#country').val()
+            let area = $('#area').val()
+            let population = $('#population').val()
+            let gdp = $('#gdp').val()
+            let description = $('#description').val()
+
+            let city = {
+                name: cityName,
+                country: country,
+                area: area,
+                population: population,
+                gdp: gdp,
+                description: description
+            }
+
+            $.ajax({
+                url: 'http://localhost:8080/city',
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify(city),
+                success: function (result) {
+                    alert(result)
+                }
+            })
+        }
+    </script>
+
+    <script>
+        function showEditForm(cityId) {
+            $.ajax({
+                url: `http://localhost:8080/city/${cityId}`,
+                method: 'GET',
+                success: function (result) {
+                    let editForm = `
+                    <form>
+                        <div>
+                            <label for="">City name</label>
+
+                            <input type="text" id="new-cityName" value="${result.name}">
+                        </div>
+                        <div>
+                            <label for="">Country</label>
+                            <input type="text" id="new-country" value="${result.country}">
+                        </div>
+                        <div>
+                            <label for="">Area</label>
+                            <input type="number" id="new-area" value="${result.area}">
+                        </div>
+                        <div>
+                            <label for="">Population</label>
+                            <input type="number" id="new-population" value="${result.population}">
+                        </div>
+                        <div>
+                            <label for="">GDP</label>
+                            <input type="number" id="new-gdp" value="${result.gdp}">
+                        </div>
+                        <div>
+                            <label for="">Description</label>
+                            <input type="text" id="new-description" value="${result.description}">
+                        </div>
+                        <button type="button" onclick="submitEditCity(${cityId})">Submit</button>
+                    </form>
+                    `
+                    document.getElementById('editForm').innerHTML = editForm
+                }
+            })
+        }
+    </script>
+
+    <script>
+        function submitEditCity(cityId) {
+            let cityName = $('#new-cityName').val()
+            let country = $('#new-country').val()
+            let area = $('#new-area').val()
+            let population = $('#new-population').val()
+            let gdp = $('#new-gdp').val()
+            let description = $('#new-description').val()
+
+            let city = {
+                cityId: cityId,
+                name: cityName,
+                country: country,
+                area: area,
+                population: population,
+                gdp: gdp,
+                description: description
+            }
+
+            $.ajax({
+                url: 'http://localhost:8080/city',
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify(city),
+                success: function (result) {
+                    alert(result)
+                }
+            })
+        }
+    </script>
+
+    <script>
+        function deleteCity(cityID) {
+            $.ajax ({
+                url: `http://localhost:8080/city/${cityID}`,
+                method: 'DELETE',
+                success: function (result) {
+                    alert(result)
+                }
+            })
+        }
+    </script>
+
+    <script>
+        function showDetails(cityId) {
+            $.ajax({
+                url: `http://localhost:8080/city/${cityId}`,
+                method: 'GET',
+                success: function (result) {
+                    let editForm = `
+                    <p><span>id: </span>${result.cityId}</p>
+                    <p><span>Name: </span>${result.name}</p>
+                    <p><span>Country: </span>${result.country}</p>
+                    <p><span>Area: </span>${result.area}</p>
+                    <p><span>Population: </span>${result.population}</p>
+                    <p><span>GDP: </span>${result.gdp}</p>
+                    <p><span>Description: </span>${result.description}</p>
+                    `
+                    document.getElementById('city-detail').innerHTML = editForm
+                }
+            })
+        }
+    </script>
+</head>
+
+<body>
+<h1>City List</h1>
+<div>
+    <table id="city-table">
+
+    </table>
+
+</div>
+
+<button type="button" onclick="displayAddForm()">Add City</button>
+
+<div id="add-form">
+
+</div>
+
+<div id="editForm">
+
+</div>
+
+<div id="city-detail">
+
+</div>
+</body>
+</html>
